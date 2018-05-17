@@ -1,0 +1,12 @@
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        "browsers": ["chrome > 50", "ios > 7", "android > 4.4"]
+      },
+      "modules": false
+    }],
+    "stage-2"
+  ],
+  "plugins": ["external-helpers"]
+}

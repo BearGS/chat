@@ -1,21 +1,21 @@
-// const __napos__sendToBrowser__ = global.__napos__sendToBrowser__
-import v4 from 'uuid/v4'
-import request, { invokeMap } from './request'
-import { resolvedAsNcp, packet } from './utils'
+import isPlainObject from 'is-plain-object'
+import request, { handleResponse } from './request'
+import { packet } from './utils'
 
 export default class Chat {
-  constructor () {
+  constructor (config) {
     if (typeof Chat.instance === 'object'
       && Chat.instance instanceof Chat) {
       return Chat.instance;
     }
-    Reflect.defineProperty(Chat, 'instance', {
+    Object.defineProperty(Chat, 'instance', {
       value: this,
       configurable: false,
       writable: false,
     })
 
     this.init()
+    this.config(config)
     this.request = Object.create(request)
   }
 
@@ -24,27 +24,18 @@ export default class Chat {
       throw new Error('runtime error')
     }
     // 兼容老的nw数据回传方式
-    global.__napos__sendToJavascript__ = this.onData.bind(this)
+    global.__napos__sendToJavascript__ = handleResponse
   }
 
-  // 兼容老的nw数据回传方式
-  onData (packet = {}) {
-    const { id } = packet
-    if (!id) {
-      throw new Error('receive packet error')
+  config (config) {
+    if (!isPlainObject(config)) {
+      throw new Error('config error')
     }
-    const promise = invokeMap.get(id)
-    if (!promise) {
-      throw new Error('receive packet error')
-    }
-    resolvedAsNcp(packet)
-      ? promise.resolve(packet)
-      : promise.reject(packet)
-    invokeMap.delete(id)
+    this._config = config
   }
 
   invoke (...args) {
-    return this.request.invoke(packet(...args))
+    return this.request.invoke(packet(this._config, ...args))
   }
 
   onError (callback) {
