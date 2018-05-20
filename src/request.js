@@ -1,6 +1,5 @@
 import { resolvedAsNcp } from './utils'
 
-// 兼容老的nw数据回传方式
 const invokeMap = new Map()
 
 // 兼容老的nw数据回传方式
